@@ -31,7 +31,6 @@ instance Show Expr where
   show (Impl (Var a1) e2) = a1 ++ " -> (" ++ show e2 ++ ")"
   show (Impl e1 e2) = "(" ++ show e1 ++ ") -> (" ++ show e2 ++ ")"
 
-
 type Sequent = ([Expr], [Expr])
 
 data SeqTree = Empty
@@ -40,7 +39,11 @@ data SeqTree = Empty
 instance Show SeqTree where
   show Empty = ""
   show (Node (xs, ys) [Empty]) = show xs ++ " |- " ++ show ys
-  show (Node (xs, ys) tr) = show xs ++ " |- " ++ show ys ++ "\n-----\n\n" ++ concatMap show tr
+  show (Node (xs, ys) tr) = show xs ++ " |- " ++ show ys ++ "\n-----\n\n" ++ concatMap showSpaced tr
+
+-- Show with spaces after element
+showSpaced :: Show a => a -> String
+showSpaced a = show a ++ "       "
 
 -- Solve expression --
 solve :: Expr -> SeqTree
@@ -59,10 +62,18 @@ procSeq :: Sequent -> [Sequent]
 procSeq ([], []) = []
 procSeq s = if checkSeq s
             then []
-            else simplify s
+            else map reduceSame (simplify s)
 
+-- Reduce same variables in antecedent or succedent
+reduceSame :: Sequent -> Sequent
+reduceSame (xs, ys) = (reduceSameExps xs, reduceSameExps ys)
 
--- Simplify expression sets. Makes one step --
+reduceSameExps :: [Expr] -> [Expr]
+reduceSameExps [] = []
+reduceSameExps (x:xs) | x `elem` xs = reduceSameExps xs
+                      | otherwise   = x : reduceSameExps xs
+
+-- Simplify sequent. Makes one step --
 simplify :: Sequent -> [Sequent]
 
 simplify (Impl a b:xs, ys) = [(b:xs, ys), (xs, a:ys)]
