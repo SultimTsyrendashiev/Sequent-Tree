@@ -39,15 +39,30 @@ data SeqTree = Empty
 instance Show SeqTree where
   show Empty = ""
   show (Node (xs, ys) [Empty]) = show xs ++ " |- " ++ show ys
-  show (Node (xs, ys) tr) = show xs ++ " |- " ++ show ys ++ "\n-----\n\n" ++ concatMap showSpaced tr
+  show (Node (xs, ys) tr) = show xs ++ " |- " ++ show ys ++ "\n-----------\n" ++ concatMap showSpaced tr
 
 -- Show with spaces after element
 showSpaced :: Show a => a -> String
 showSpaced a = show a ++ "       "
 
 -- Solve expression --
-solve :: Expr -> SeqTree
-solve e = solveSeq ([], [e])
+solve :: Expr -> Maybe SeqTree
+solve e = let tree = solveSeq ([], [e])
+          in if isValid tree
+             then Just tree
+             else Nothing
+
+-- Check validness of a tree --
+isValid :: SeqTree -> Bool
+isValid Empty = True
+-- if node is a leaf
+isValid (Node (xs,ys) [Empty]) = not $ haveSame xs ys
+isValid (Node _ tree) = foldr ((&&) . isValid) True tree
+
+haveSame :: [Expr] -> [Expr] -> Bool
+haveSame [] _ = False
+haveSame (x:xs) ys | x `elem` ys = True
+                   | otherwise   = haveSame xs ys
 
 -- Create sequent tree --
 solveSeq :: Sequent -> SeqTree
