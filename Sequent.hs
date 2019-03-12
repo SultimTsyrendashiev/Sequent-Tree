@@ -175,12 +175,4 @@ test4 :: Sequent
 test4 = ([],[Conj (Impl (Not (Conj (Var "q") (Var "s"))) (Var "p")) (Conj (Disj (Var "p") (Var "q")) (Impl (Not (Conj (Var "p") (Var "q"))) (Var "p")))])
 
 test5 :: Sequent
-test5 = ([],[Conj
-  (Impl
-    (Not (Conj (Var "s") (Var "t")))
-    (Var "p"))
-  (Conj
-    (Disj (Var "p") (Var "q"))
-    (Impl
-      (Not (Conj (Var "p") (Var "q")))
-      (Var "p")))])
+test5 = ([],[Conj(Conj (Not (Conj (Var "s") (Var "t")))(Var "p"))(Conj(Disj(Conj (Var "p") (Var "t"))(Var "s"))(Var "p"))])
