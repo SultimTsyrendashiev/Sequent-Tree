@@ -112,7 +112,7 @@ haveSame (x:xs) ys = x `elem` ys || haveSame xs ys
 
 -- Create sequent tree --
 createTree :: Sequent -> SeqTree
-createTree s = Node s $ Prelude.map createTree $ procSeq s
+createTree s = Node s (Prelude.map createTree (procSeq s))
 
 -- Returns [] if all members are variables
 procSeq :: Sequent -> [Sequent]
@@ -132,7 +132,7 @@ reduceSameExps (x:xs) | x `elem` xs = reduceSameExps xs
 -- Simplify sequent. Makes one step --
 simplify :: Sequent -> [Sequent]
 
-simplify (Impl a b:xs, ys) = [(b:xs, ys), (xs, a:ys)]
+simplify ((Impl a b):xs, ys) = [(b:xs, ys), (xs, a:ys)]
 simplify (xs, Impl a b:ys) = [(a:xs, b:ys)]
 
 simplify (Conj a b:xs, ys) = [(a:b:xs, ys)]
@@ -144,8 +144,8 @@ simplify (xs, Disj a b:ys) = [(xs, a:b:ys)]
 simplify (Not a:xs, ys) = [(xs, a:ys)]
 simplify (xs, Not a:ys) = [(a:xs, ys)]
 
-simplify (x@(Var _):xs, ys) = [(x:xs, ys)]
-simplify (xs, y@(Var _):ys) = [(xs, y:ys)]
+simplify (x@(Var _):xs, ys) = [(xs ++ [x], ys)]
+simplify (xs, y@(Var _):ys) = [(xs, ys ++ [y])]
 
 simplify ([], []) = []
 
@@ -176,3 +176,6 @@ test4 = ([],[Conj (Impl (Not (Conj (Var "q") (Var "s"))) (Var "p")) (Conj (Disj 
 
 test5 :: Sequent
 test5 = ([],[Conj(Conj (Not (Conj (Var "s") (Var "t")))(Var "p"))(Conj(Disj(Conj (Var "p") (Var "t"))(Var "s"))(Var "p"))])
+
+testS :: Sequent
+testS = ([], [Var "p", (Disj (Var "p") (Var "q"))])
